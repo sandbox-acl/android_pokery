@@ -26,34 +26,52 @@ data class ChoiceTweak(
     fun command(value: String) = AdbCommands.putSetting(namespace, key, value)
 }
 
+/** One of the three global animation scales, adjustable in [STEP] increments. */
+data class AnimationScale(val title: String, val description: String, val key: String) {
+
+    fun read(resolver: ContentResolver): Float =
+        runCatching { Settings.Global.getFloat(resolver, key, DEFAULT) }.getOrDefault(DEFAULT)
+
+    fun command(scale: Float) = AdbCommands.putSetting(Namespace.GLOBAL, key, format(scale))
+
+    companion object {
+        const val MIN = 0f
+        const val MAX = 2f
+        const val STEP = 0.05f
+        const val DEFAULT = 1f
+
+        /** Number of intermediate stops for a Slider covering [MIN]..[MAX]. */
+        val sliderSteps: Int = Math.round((MAX - MIN) / STEP) - 1
+
+        /** Rounds to the nearest [STEP] and clamps to the allowed range. */
+        fun snap(value: Float): Float {
+            val stepped = Math.round(value / STEP) * STEP
+            return (Math.round(stepped * 100f) / 100f).coerceIn(MIN, MAX)
+        }
+
+        /** "0.95", "1.15", "1", "0.5": the shortest exact form, suitable for `settings put`. */
+        fun format(value: Float): String =
+            java.math.BigDecimal(snap(value).toString()).stripTrailingZeros().toPlainString()
+    }
+}
+
 object Tweaks {
 
-    private val animationChoices = listOf(
-        "Off" to "0", "0.25×" to "0.25", "0.5×" to "0.5", "0.75×" to "0.75",
-        "1× (default)" to "1", "1.5×" to "1.5", "2×" to "2",
-    )
-
-    val animationKeys = listOf(
-        Settings.Global.WINDOW_ANIMATION_SCALE,
-        Settings.Global.TRANSITION_ANIMATION_SCALE,
-        Settings.Global.ANIMATOR_DURATION_SCALE,
-    )
-
     val animations = listOf(
-        ChoiceTweak(
+        AnimationScale(
             "Window animation scale",
             "Opening and closing dialogs and windows.",
-            Namespace.GLOBAL, Settings.Global.WINDOW_ANIMATION_SCALE, animationChoices, "1",
+            Settings.Global.WINDOW_ANIMATION_SCALE,
         ),
-        ChoiceTweak(
+        AnimationScale(
             "Transition animation scale",
             "Moving between apps and screens.",
-            Namespace.GLOBAL, Settings.Global.TRANSITION_ANIMATION_SCALE, animationChoices, "1",
+            Settings.Global.TRANSITION_ANIMATION_SCALE,
         ),
-        ChoiceTweak(
+        AnimationScale(
             "Animator duration scale",
-            "Animations inside apps. \"Off\" also stops some progress spinners.",
-            Namespace.GLOBAL, Settings.Global.ANIMATOR_DURATION_SCALE, animationChoices, "1",
+            "Animations inside apps. 0× also stops some progress spinners.",
+            Settings.Global.ANIMATOR_DURATION_SCALE,
         ),
     )
 

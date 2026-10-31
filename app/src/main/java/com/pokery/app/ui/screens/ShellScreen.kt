@@ -2,6 +2,7 @@ package com.pokery.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -40,6 +42,8 @@ import com.pokery.app.shell.AdbCommands
 import com.pokery.app.shell.PrivilegedShell
 import com.pokery.app.shell.ShellResult
 import kotlinx.coroutines.launch
+
+const val SHELL_INPUT_TAG = "shell-input"
 
 private data class ShellEntry(val command: String, val result: ShellResult)
 
@@ -78,28 +82,31 @@ fun ShellScreen(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(horizontal = 16.dp),
         )
-        SelectionContainer(Modifier.weight(1f)) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(history) { entry ->
-                    Column(Modifier.fillMaxWidth().padding(8.dp)) {
-                        Text("$ ${entry.command}", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary)
-                        if (entry.result.output.isNotEmpty()) {
-                            Text(entry.result.output, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
-                        }
-                        if (!entry.result.isSuccess) {
-                            Text(
-                                "exit ${entry.result.exitCode}",
-                                fontFamily = FontFamily.Monospace,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.error,
-                            )
+        // The weighted Box takes whatever height is left, so the input row below always fits.
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            SelectionContainer {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(history) { entry ->
+                        Column(Modifier.fillMaxWidth().padding(8.dp)) {
+                            Text("$ ${entry.command}", fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.primary)
+                            if (entry.result.output.isNotEmpty()) {
+                                Text(entry.result.output, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
+                            }
+                            if (!entry.result.isSuccess) {
+                                Text(
+                                    "exit ${entry.result.exitCode}",
+                                    fontFamily = FontFamily.Monospace,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
                         }
                     }
                 }
@@ -117,7 +124,7 @@ fun ShellScreen(modifier: Modifier = Modifier) {
                 textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send, autoCorrectEnabled = false),
                 keyboardActions = KeyboardActions(onSend = { run() }),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).testTag(SHELL_INPUT_TAG),
             )
             if (running) {
                 CircularProgressIndicator(Modifier.padding(start = 12.dp))

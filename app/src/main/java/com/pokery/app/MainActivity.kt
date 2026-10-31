@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Apps
@@ -79,7 +81,9 @@ private fun PokeryRoot() {
             }
         },
     ) { padding ->
-        val modifier = Modifier.padding(padding)
+        // Consume what the Scaffold already pads for, so imePadding only adds the
+        // part of the keyboard that sits above the navigation bar.
+        val modifier = Modifier.padding(padding).consumeWindowInsets(padding).imePadding()
         when (tab) {
             Tab.Status -> StatusScreen(modifier)
             Tab.Apps -> AppsScreen(modifier)
