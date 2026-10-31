@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pokery.app.crash.CrashReportActivity
 import com.pokery.app.crash.CrashReporter
 import com.pokery.app.shell.PrivilegedShell
+import com.pokery.app.shell.ShizukuShell
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
@@ -18,8 +19,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.ConscryptMode
 
 @RunWith(AndroidJUnit4::class)
+@ConscryptMode(ConscryptMode.Mode.OFF)
 @Config(sdk = [26, 28, 30, 33, 35])
 class LaunchTest {
 
@@ -28,7 +31,12 @@ class LaunchTest {
 
     @Test
     fun everyTabRenders() {
-        compose.onNodeWithText("Shizuku is not installed").assertExists()
+        compose.onNodeWithText("Not connected").assertExists()
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            compose.onNodeWithText("Not paired yet.").assertExists()
+        } else {
+            compose.onNodeWithText("adb tcpip 5555", substring = true).assertExists()
+        }
         listOf("Debloat", "Tweaks", "Shell", "Status").forEach { tab ->
             compose.onNodeWithText(tab, useUnmergedTree = true).performClick()
             compose.waitForIdle()
@@ -37,6 +45,7 @@ class LaunchTest {
 }
 
 @RunWith(AndroidJUnit4::class)
+@ConscryptMode(ConscryptMode.Mode.OFF)
 @Config(sdk = [26, 35])
 class ShizukuInstalledTest {
 
@@ -44,7 +53,7 @@ class ShizukuInstalledTest {
     fun launchesWhenShizukuIsInstalledButNotRunning() {
         val app = ApplicationProvider.getApplicationContext<android.app.Application>()
         shadowOf(app.packageManager).installPackage(PackageInfo().apply {
-            packageName = PrivilegedShell.SHIZUKU_PACKAGE
+            packageName = ShizukuShell.SHIZUKU_PACKAGE
         })
         PrivilegedShell.refresh()
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -54,6 +63,7 @@ class ShizukuInstalledTest {
 }
 
 @RunWith(AndroidJUnit4::class)
+@ConscryptMode(ConscryptMode.Mode.OFF)
 @Config(sdk = [35])
 class CrashReportTest {
 

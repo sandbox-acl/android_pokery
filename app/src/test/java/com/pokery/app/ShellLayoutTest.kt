@@ -15,8 +15,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.ConscryptMode
 
 @RunWith(AndroidJUnit4::class)
+@ConscryptMode(ConscryptMode.Mode.OFF)
 @Config(sdk = [35], qualifiers = "w411dp-h891dp")
 class ShellLayoutTest {
 

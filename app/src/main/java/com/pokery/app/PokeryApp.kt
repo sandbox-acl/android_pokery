@@ -8,7 +8,7 @@ class PokeryApp : Application() {
     override fun onCreate() {
         super.onCreate()
         CrashReporter.install(this)
-        // Never let Shizuku setup take the whole app down; record the error instead.
+        // Never let connection setup take the whole app down; record the error instead.
         try {
             PrivilegedShell.init(this)
         } catch (t: Throwable) {

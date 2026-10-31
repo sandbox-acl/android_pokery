@@ -10,6 +10,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // libadb-android is only published on JitPack; don't resolve anything else from there.
+        maven("https://jitpack.io") {
+            content { includeGroupByRegex("com\\.github\\.MuntashirAkon.*") }
+        }
     }
 }
 rootProject.name = "Pokery"

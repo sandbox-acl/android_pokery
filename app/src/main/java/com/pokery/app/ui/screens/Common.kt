@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pokery.app.shell.PrivilegedShell
-import com.pokery.app.shell.ShellStatus
 
 @Composable
 fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
@@ -29,8 +28,8 @@ fun ScreenTitle(text: String, modifier: Modifier = Modifier) {
 /** Shown on feature screens while the privileged shell isn't available. */
 @Composable
 fun NotConnectedBanner(modifier: Modifier = Modifier) {
-    val status by PrivilegedShell.status.collectAsState()
-    if (status is ShellStatus.Ready) return
+    val active by PrivilegedShell.active.collectAsState()
+    if (active != null) return
     Card(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
         Row(
             Modifier.padding(12.dp),
@@ -38,7 +37,7 @@ fun NotConnectedBanner(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Column {
-                Text("Not connected to Shizuku", style = MaterialTheme.typography.titleSmall)
+                Text("Not connected", style = MaterialTheme.typography.titleSmall)
                 Text(
                     "Actions here need ADB-level access. Set it up in the Status tab.",
                     style = MaterialTheme.typography.bodySmall,

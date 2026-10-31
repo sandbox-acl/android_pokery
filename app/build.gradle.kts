@@ -13,8 +13,8 @@ android {
         applicationId = "com.pokery.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.1.2"
+        versionCode = 4
+        versionName = "0.2.0"
     }
 
     buildTypes {
@@ -53,6 +53,13 @@ dependencies {
     val shizuku = "13.1.5"
     implementation("dev.rikka.shizuku:api:$shizuku")
     implementation("dev.rikka.shizuku:provider:$shizuku")
+
+    // Built-in ADB client: pairs with and connects to the phone's own Wireless debugging.
+    implementation("com.github.MuntashirAkon:libadb-android:3.1.1")
+    // TLS 1.3 with keying-material export, needed for Wireless debugging pairing.
+    implementation("org.conscrypt:conscrypt-android:2.5.3")
+    // Self-signed certificate for the ADB key (same BouncyCastle flavour libadb uses).
+    implementation("org.bouncycastle:bcpkix-jdk15to18:1.81")
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")

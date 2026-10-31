@@ -7,6 +7,21 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <!-- Built-in ADB client: talks to the phone's own adbd over localhost. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Pairing runs as a foreground service with a notification asking for the code. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- Satisfies the connectedDevice foreground-service prerequisite on Android 14+. -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <!-- Not granted at install. Pokery grants it to itself over ADB after the first
+         connection, so it can switch Wireless debugging back on after a reboot. -->
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
     <queries>
         <package android:name="moe.shizuku.privileged.api" />
     </queries>
@@ -33,6 +48,11 @@
             android:name=".crash.CrashReportActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light" />
+
+        <service
+            android:name=".adb.PairingService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
 
         <!-- Lets the Shizuku server hand its binder to this app. -->
         <provider
