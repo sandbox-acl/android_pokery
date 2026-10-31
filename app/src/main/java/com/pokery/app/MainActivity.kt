@@ -1,5 +1,6 @@
 package com.pokery.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.pokery.app.crash.CrashReportActivity
+import com.pokery.app.crash.CrashReporter
 import com.pokery.app.shell.PrivilegedShell
 import com.pokery.app.ui.screens.AppsScreen
 import com.pokery.app.ui.screens.ShellScreen
@@ -32,6 +35,11 @@ import com.pokery.app.ui.theme.PokeryTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (CrashReporter.pending(this) != null) {
+            startActivity(Intent(this, CrashReportActivity::class.java))
+            finish()
+            return
+        }
         enableEdgeToEdge()
         setContent { PokeryTheme { PokeryRoot() } }
     }
@@ -39,7 +47,11 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         // Shizuku may have been started or stopped while we were in the background.
-        PrivilegedShell.refresh()
+        try {
+            PrivilegedShell.refresh()
+        } catch (t: Throwable) {
+            CrashReporter.record(this, "PrivilegedShell.refresh failed (app kept running)", t)
+        }
     }
 }
 

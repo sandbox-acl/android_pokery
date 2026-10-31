@@ -29,6 +29,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".crash.CrashReportActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light" />
+
         <!-- Lets the Shizuku server hand its binder to this app. -->
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
